@@ -1,26 +1,19 @@
-## 🎉 TEESimulator v3.1: Legacy Support & Resilience
+## 🚀 Release: TEESimulator v3.2 (Hotfix)
 
-This release marks a significant step forward in our mission, focusing on breathing life into devices with **broken TEEs** and extending full support to older Android versions (**Android 10–12**).
+TEESimulator v3.2 is rolling out today as an hotfix. This release was pushed ahead of schedule because our recent GitHub build artifacts were expiring, and a severe Google Play Services (GMS) log flooding bug was significantly degrading device performance for many users. 📱⚡
 
-### 🛡️ Enhanced Keystore2 Emulation
-We have implemented critical APIs to support devices where the hardware TEE is broken or for applications configured to use key generation mode. These improvements directly address detection vectors identified in v3.0:
+⚠️ **Important Development Update:**
+*   **Detections:** Due to time constraints, we haven't patched *all* the new detections currently in the wild. However, this hotfix does successfully address a few critical detection points. 🛡️
+*   **LSPosed ➡️ Vector:** I (JingMatrix) am currently dedicating my efforts to refactoring LSPosed into **Vector**. Consequently, TEESimulator's development pace will temporarily slow down. Please stay tuned and monitor the commit history to follow along with our progress! 🛠️👀
 
-*   **✅ Full Crypto Operations (`createOperation`)**: The simulator now correctly handles `SIGN`, `VERIFY`, `ENCRYPT`, and `DECRYPT` purposes for software-generated keys.
-*   **🔗 Certificate Chain Updates (`updateSubcomponent`)**: Added support for applications updating the certificate chain of virtual keys (e.g., via `KeyStore.setKeyEntry`).
-*   **📋 Enumeration Support (`listEntries`)**: Generated keys are now properly visible in enumeration APIs like `KeyStore.aliases()`, thanks to the implementation of `listEntries` and `listEntriesBatched`.
+Here is the changelog for this release:
 
-### 🔧 Compatibility & Stability
-We’ve ironed out crashes and architecture-specific bugs to ensure a smooth experience across more devices:
+🔧 **Stability & Performance**
+*   **🛑 GMS Log Flooding:** Mitigated massive log spam and battery drain (especially noticeable on WearOS or Nearby Share) by safely bypassing `list` hooks for GMS.
+*   **💥 Binder Leak Resolved:** Squashed a critical strong reference memory leak during binder transaction interception that caused random crashes.
 
-*   **Android 10**: Fixed a crash caused by the missing `waitForService` method.
-*   **Android 11**: Implemented environment initialization and daemon UID spoofing to successfully bypass keystore generation permission checks.
-*   **ARM 32-bit (Android 12)**: Resolved `ptrace` compatibility issues by falling back to `PTRACE_GETREGS` and `PTRACE_SETREGS`.
-*   **x86_64 Emulators**: Enforced respect for the stack pointer "red zone" and added a staging fallback mechanism for file descriptor transfering of `libTEESimulator.so`.
-
-### 🚀 The Road Ahead
-
-We are aware of the remaining detection vectors (see the issues list) and have clear solutions mapped out for the next release.
-
-Google's aggressive push for **Remote Key Provisioning (RKP)** and the drying up of leaked keyboxes is **not** the end for TEESimulator. Our ultimate goal remains unchanged: defeating Keystore attestation **without relying on a valid keybox**.
-
-We are inching closer to this milestone, but the fight for device freedom is complex and resource-intensive. Your patience and support (both time and financial) are vital as we conquer these new challenges.
+🛡️ **Anti-Detection & Emulation**
+*   **🔑 Pre-Existing Key Override:** TEESimulator now detects and replaces hardware keys that apps managed to request *before* the module was installed, ensuring all future operations remain under control.
+*   **🧩 Accurate `module_hash`:** Completely aligned the APEX module hashing logic with the official Android `keystore2` implementation (including direct `/apex` filesystem scanning and exact ASN.1 DER sorting).
+*   **📜 Certificate `KeyUsage` Fix:** Dynamically sets X.509 `KeyUsage` bits based on the actual key purpose to properly adhere to Android HAL specifications *(the first contribution of @Enginex0!)*.
+*   **⚙️ Core Improvements:** Enhanced KeyMint logging (parsing `ORIGIN`, `OS_VERSION`, etc.) and fixed Parcel position resets for cleaner internal error handling.
